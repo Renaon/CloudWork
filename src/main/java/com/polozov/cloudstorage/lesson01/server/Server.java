@@ -1,4 +1,4 @@
-package com.polozov.cloudstorage.lesson01;
+package com.polozov.cloudstorage.lesson01.server;
 
 import java.net.ServerSocket;
 import java.util.concurrent.ExecutorService;
@@ -8,6 +8,8 @@ public class Server {
 	// TODO: 14.06.2021
 	// организовать корректный вывод статуса
 	// подумать почему так реализован цикл в ClientHandler
+	//ошибку со статусом не поймал, она у меня попросту не появилась
+	//цикл реализован таким образом для того, чтоб корректно был передан бит четности, который также необходимо прочитать
 	public Server() {
 		ExecutorService service = Executors.newFixedThreadPool(4);
 		try (ServerSocket server = new ServerSocket(5678)){
