@@ -59,6 +59,7 @@ public class ClientHandler implements Runnable {
 					out.flush();
 					fis.close();
 					System.out.println("Файл закрыт");
+					//TODO close
 				}
 				if ("exit".equals(command)) {
 					System.out.printf("Client %s disconnected correctly\n", socket.getInetAddress());
