@@ -11,7 +11,7 @@ public class Server {
 	//ошибку со статусом не поймал, она у меня попросту не появилась
 	//цикл реализован таким образом для того, чтоб корректно был передан бит четности,
 	// который также необходимо прочитать
-	//TODO close
+	//TODO close.
 	public Server() {
 		ExecutorService service = Executors.newFixedThreadPool(4);
 		try (ServerSocket server = new ServerSocket(5678)){
