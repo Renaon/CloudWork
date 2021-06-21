@@ -76,7 +76,7 @@ public class Client extends JFrame {
 			e.printStackTrace();
 			System.out.println("ERROR");
 		}
-		//TODO close
+		//TODO close.
 
 	}
 
