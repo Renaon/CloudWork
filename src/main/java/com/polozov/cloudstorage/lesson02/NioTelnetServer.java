@@ -10,6 +10,10 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -18,6 +22,11 @@ import java.util.Set;
 public class NioTelnetServer {
     private static final String LS_COMMAND = "\tls     view all files from current directory";
     private static final String MKDIR_COMMAND = "\tmkdir  view all files from current directory";
+    private static final String TOUCH_COMMAND = "\t touch create file";
+    private static final String CD_COMMAND = "\t cd go to path";
+
+    private String LOGIN;
+    private String ROOT_PATH;
 
     private final ByteBuffer buffer = ByteBuffer.allocate(512);
 
@@ -97,6 +106,37 @@ public class NioTelnetServer {
             } else if ("ls".equals(command)) {
                 sendMessage(getFilesList().concat("\n"), selector, client);
             }
+        }
+    }
+    private void mkdir(Path wish){
+        Path path = Paths.get(ROOT_PATH + wish);
+        try{
+            Path newPath = Files.createDirectory(path);
+        } catch(FileAlreadyExistsException e) {
+            System.out.println("File already exists");
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setLOGIN(String LOGIN) {
+        this.LOGIN = LOGIN;
+        this.ROOT_PATH = LOGIN + File.separator;
+    }
+
+    public String getLOGIN(){
+        return this.LOGIN;
+    }
+
+    private void touch(String filename){
+        //создадим файл
+        Path path = Paths.get(this.LOGIN + File.separator + filename);
+        if (Files.exists(path)){
+            System.out.println("Файл уже существует");
+        }else{
+            try {
+                Files.createFile(path);
+            }catch(IOException e){ e.printStackTrace();}
         }
     }
 
