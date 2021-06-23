@@ -1,19 +1,13 @@
 package com.polozov.cloudstorage.lesson02;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
+import java.nio.channels.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -24,9 +18,12 @@ public class NioTelnetServer {
     private static final String MKDIR_COMMAND = "\tmkdir  view all files from current directory";
     private static final String TOUCH_COMMAND = "\t touch create file";
     private static final String CD_COMMAND = "\t cd go to path";
+    private static final String RM_COMMAND = "\t rm delete file or directory";
+    private static final String COPY_COMMAND = "\t copy copy file/directory";
+    private static final String CHANGENICK = "\t changenick change your nickname";
 
     private String LOGIN;
-    private String ROOT_PATH;
+    private String ROOT_PATH = "server" + File.separator;
 
     private final ByteBuffer buffer = ByteBuffer.allocate(512);
 
@@ -108,7 +105,7 @@ public class NioTelnetServer {
             }
         }
     }
-    private void mkdir(Path wish){
+    private void mkdir(String wish){
         Path path = Paths.get(ROOT_PATH + wish);
         try{
             Path newPath = Files.createDirectory(path);
@@ -119,18 +116,47 @@ public class NioTelnetServer {
         }
     }
 
-    public void setLOGIN(String LOGIN) {
+    private String rm(String way){
+        Path path = Paths.get(ROOT_PATH + way);
+        try {
+            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    System.out.println("delete file: " + file.toString());
+                    Files.delete(file);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                    Files.delete(dir);
+                    System.out.println("delete dir: " + dir.toString());
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch(IOException e){
+            e.printStackTrace();
+        }
+        return "files deleted";
+    }
+
+    private Path cd(String moving){
+        return Paths.get(ROOT_PATH + moving);
+    }
+
+    public String changenick(String LOGIN) {
         this.LOGIN = LOGIN;
         this.ROOT_PATH = LOGIN + File.separator;
+        return LOGIN;
     }
 
     public String getLOGIN(){
         return this.LOGIN;
     }
 
-    private void touch(String filename){
+    private String touch(String filename){
         //создадим файл
-        Path path = Paths.get(this.LOGIN + File.separator + filename);
+        Path path = Paths.get(this.ROOT_PATH + File.separator + filename);
         if (Files.exists(path)){
             System.out.println("Файл уже существует");
         }else{
@@ -138,6 +164,27 @@ public class NioTelnetServer {
                 Files.createFile(path);
             }catch(IOException e){ e.printStackTrace();}
         }
+        return "file is created";
+    }
+
+    private void cat(String filename){
+
+    }
+
+    private String copy(String src, String target){
+        FileChannel srcCh = null;
+        FileChannel tch = null;
+        try{
+            srcCh = new FileInputStream(new File(src)).getChannel();
+            tch = new FileOutputStream(new File(target)).getChannel();
+            tch.transferFrom(srcCh, 0, srcCh.size());
+
+            srcCh.close();
+            tch.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "copied";
     }
 
     private void sendMessage(String message, Selector selector, SocketAddress client) throws IOException {
