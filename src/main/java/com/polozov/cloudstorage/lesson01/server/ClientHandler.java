@@ -44,21 +44,7 @@ public class ClientHandler implements Runnable {
 				}
 
 				if ("download".equals(command)) {
-					// TODO: 14.06.2021
-					String filename = in.readUTF();
-					File file = new File("server" + File.separator + filename);
-					long size = file.length();
-					out.writeLong(size);
-					FileInputStream fis = new FileInputStream(file);
-					byte[] buffer = new byte[8*1024];
-					int read = 0;
-					while ((read = fis.read(buffer)) != -1) {
-						out.write(buffer, 0, read);
-					}
 
-					out.flush();
-					fis.close();
-					System.out.println("Файл закрыт");
 					//TODO close.
 				}
 				if ("exit".equals(command)) {
